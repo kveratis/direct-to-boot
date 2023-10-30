@@ -128,6 +128,10 @@ describe('DirectToBoot', () => {
         )
 
         await screen.findByTestId("store-is-notified")
+
+        expect(screen.getByTestId("description")).toHaveTextContent(
+            "Thanks for letting us know, you order will come to you in a minute"
+        )
     })
 
     const mockNetworkFailure = () => {
@@ -183,4 +187,6 @@ describe('DirectToBoot', () => {
 
         await screen.findByTestId("store-phone-number")
     })
+
+
 })
