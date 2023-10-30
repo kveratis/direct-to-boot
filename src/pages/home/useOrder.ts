@@ -12,7 +12,9 @@ export const useOrder = (orderId: string) => {
 
     const fetchOrderStatus = async () => {
         try {
-            const response = await axios.get(`${Constants.API_URL}/orders/${orderId}`)
+            const response = await axios.get(
+                `${Constants.API_URL}/orders/${orderId}`
+            )
             const isOrderReady = response.data.status === "ready"
             setReady(isOrderReady)
             setDelay(isOrderReady ? stopPollingDelay : pollingDelay)

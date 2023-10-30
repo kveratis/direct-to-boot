@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { rest } from "msw";
 import { Constants } from "../../constants";
 import { server } from "../../mocks/server";
@@ -83,5 +83,50 @@ describe('DirectToBoot', () => {
         await waitFor(() => expect(screen.getByTestId('iamhere')).toBeEnabled(), {
             timeout: 5000
         })
+    })
+
+    function mockNotifyStore() {
+        server.use(
+            rest.get(`${Constants.API_URL}/orders/:orderId`, (req, res, ctx) => {
+                const orderId = req.params["orderId"]
+
+                return res(
+                    ctx.json({
+                        order: orderId,
+                        status: "ready"
+                    })
+                )
+            }),
+            rest.post(`${Constants.API_URL}/orders/:orderId`, (req, res, ctx) => {
+                const orderId = req.params["orderId"]
+
+                return res(
+                    ctx.json({
+                        order: orderId,
+                        notified: true,
+                    })
+                )
+            })
+        )
+    }
+
+    it('notify the store that the customer has arrived', async () => {
+        mockNotifyStore();
+
+        render(<DirectToBoot orderId="0444526344" />)
+
+        const button = screen.getByTestId('iamhere')
+
+        await waitFor(() => expect(button).toBeEnabled(), {
+            timeout: 5000,
+        })
+
+        fireEvent.click(button)
+
+        await waitFor(() =>
+            expect(screen.queryByTestId("iamhere")).not.toBeInTheDocument()
+        )
+
+        await screen.findByTestId("store-is-notified")
     })
 })
